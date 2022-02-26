@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6844467032195202818}
   - component: {fileID: 6844467032195202844}
   - component: {fileID: 6844467032195202819}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Chain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -113,7 +113,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6844467032477859381}
   - component: {fileID: 6844467032477859382}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: SpikedBall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -162,7 +162,7 @@ GameObject:
   - component: {fileID: 6844467032807497605}
   - component: {fileID: 6844467032807497607}
   - component: {fileID: 6844467032807497600}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Ball
   m_TagString: Spike
   m_Icon: {fileID: 0}
