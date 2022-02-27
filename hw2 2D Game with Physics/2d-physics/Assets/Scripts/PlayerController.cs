@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿
+
+using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +10,7 @@ public class PlayerController : MonoBehaviour
 {
   Rigidbody2D rb;
   public float speed;
+  public float jumpSpeed;
   Animator anim;
 
   public float checkRadius;
@@ -85,6 +88,10 @@ public class PlayerController : MonoBehaviour
       fruitScore.text = "Fruit:"+fruitNum.ToString("00");
     }
 
+    private void Jump(){
+      rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if(other.CompareTag("Spike"))
@@ -102,6 +109,12 @@ public class PlayerController : MonoBehaviour
         {
           Die(); 
         }
+      if(other.gameObject.CompareTag("Rocket"))
+        {
+          Jump(); 
+        }
 
     }
+    
 }
+

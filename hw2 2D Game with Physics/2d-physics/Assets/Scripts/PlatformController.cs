@@ -16,7 +16,9 @@ public class PlatformController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-    Move(); }
+    Move(); 
+    }
+
     void Move(){
         transform.position += speedVec3 * Time.deltaTime;
         if(transform.position.y > topLine.transform.position.y)
