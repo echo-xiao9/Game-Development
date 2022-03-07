@@ -1,0 +1,5 @@
+sceneSetups:
+- path: Assets/Little Cat Girl/Little_Cat_Girl.unity
+  isLoaded: 1
+  isActive: 1
+  isSubScene: 0
