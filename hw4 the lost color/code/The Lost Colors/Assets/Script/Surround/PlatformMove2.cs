@@ -23,7 +23,7 @@ public class PlatformMove2 : MonoBehaviour
       timePassed += Time.deltaTime;
       float delta=moveRange*Mathf.Cos(moveSpeed*timePassed);
       float moveHorizontal = Input.GetAxis("Horizontal");
-      delta += Common.BgSpeed * Time.deltaTime * (float)moveHorizontal;  
+      // delta += Common.BgSpeed * Time.deltaTime * (float)moveHorizontal;  
       transform.position =  new Vector3(transform.position.x+delta, transform.position.y, transform.position.z);
       if(isPlayerOn && Mathf.Abs(moveHorizontal)<0.2){
         player.transform.position = new Vector3(player.transform.position.x+delta, player.transform.position.y, player.transform.position.z);
@@ -38,7 +38,7 @@ public class PlatformMove2 : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D other)
     {
-        print("开始碰撞" + other.collider.gameObject.name);
+        // print("开始碰撞" + other.collider.gameObject.name);
         if(other.gameObject.CompareTag("Player")){
           isPlayerOn=true;
           player = other.collider.gameObject;
@@ -52,7 +52,7 @@ public class PlatformMove2 : MonoBehaviour
 
     void OnCollisionExit2D(Collision2D col)
     {
-        print("碰撞结束" + col.collider.gameObject.name);
+        // print("碰撞结束" + col.collider.gameObject.name);
         if(col.gameObject.CompareTag("Player")){
           isPlayerOn=false;
           player=null;
