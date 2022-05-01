@@ -1,0 +1,133 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel Init
+#pragma kernel Step
+
+#define THREAD_X 8
+#define THREAD_Y 1
+
+// #include "UnityCG.cginc"
+
+//上一帧的顶点位置
+RWStructuredBuffer<float3> prePositions;
+//当前帧的顶点位置
+RWStructuredBuffer<float3> positions;
+
+//使用松弛法时迭代的次数
+uint iterations;
+//阻尼系数
+float damping;
+//重量
+float gravity;
+//发丝数量
+uint hairCount;
+//每根头发节点数
+uint nodeCount;
+//每根头发节点的间距
+float nodeDistance;
+//head属性
+float headRadius;
+float3 headPos;
+//dt*dt
+float sqrDt;
+float headVecLen;
+
+
+
+static uint getIndex(uint2 id) {
+    return id.x;
+}
+
+static bool isValidateId(uint index) {
+    return index >= 0 && index < hairCount;
+}
+
+// static int randNum(int min, int max){
+//   return rand()%(max-min+1)+ min;
+// }
+
+[numthreads(THREAD_X, THREAD_Y, 1)]
+void Init(uint3 id : SV_DispatchThreadID)
+{
+    uint index = getIndex(id.xy);
+
+    //初始化每根头发上所有控制顶点的位置
+    float a = 500 * frac(sin(index));
+    float b = 500  * frac(cos(index));
+    for (uint i = 0; i < nodeCount; i++)
+    {
+      
+        positions[index * nodeCount + i].y = headPos.y + (headRadius + i * nodeDistance) * sin(0.5f + a / 360.0f);
+        positions[index * nodeCount + i].x = headPos.x + (headRadius + i * nodeDistance) * cos(0.5f + a / 360.0f) * sin(2.0f * b / 360.0f - 1.0f + 3.14f);
+        positions[index * nodeCount + i].z = headPos.z + (headRadius + i * nodeDistance) * cos(0.5f + a / 360.0f) * cos(2.0f * b / 360.0f - 1.0f + 3.14f);
+        prePositions[index * nodeCount + i] = positions[index * nodeCount + i];
+    }
+}
+
+[numthreads(THREAD_X, THREAD_Y, 1)]
+void Step(uint3 id : SV_DispatchThreadID)
+{
+    uint index = getIndex(id.xy);
+    
+    for (uint i = 1; i < nodeCount; i++)
+    {
+        uint curIndex = nodeCount * index + i;
+
+        //外力造成的加速度
+        float3 a = float3(0, gravity, 0);
+
+        //TODO:计算verlet积分，同时更新位置/上一帧的位置
+        float3 posTmp = positions[index * nodeCount + i];
+        float3 prevPos = prePositions[index * nodeCount + i];
+        // verlet without damp
+        // positions[index * nodeCount + i].x=2*positions[index * nodeCount + i].x- prePositions[index * nodeCount + i].x + a.x *sqrDt;
+        // positions[index * nodeCount + i].y=2*positions[index * nodeCount + i].y- prePositions[index * nodeCount + i].y + a.y *sqrDt;
+        // positions[index * nodeCount + i].z=2*positions[index * nodeCount + i].z- prePositions[index * nodeCount + i].z + a.z *sqrDt;
+
+        // verlet with damp 新位置 x(t+T)=x(t)+d*(x(t)-x(t-T))+a(t)*T^2 
+        positions[index * nodeCount + i].x = posTmp.x + damping*(posTmp.x-prevPos.x) + a.x *sqrDt;
+        positions[index * nodeCount + i].y = posTmp.y + damping*(posTmp.y-prevPos.y) + a.y *sqrDt;
+        positions[index * nodeCount + i].z = posTmp.z + damping*(posTmp.z-prevPos.z) + a.z *sqrDt;
+
+        prePositions[index * nodeCount + i] = posTmp;
+    }
+    
+    for (uint iter = 0; iter < iterations; iter++) {
+       float3 rootPos = positions[index * nodeCount];
+        for (uint i = 1; i < nodeCount; i++)
+        {
+            uint curIndex = nodeCount * index + i;
+            
+            uint fatherIndex = nodeCount * index + i - 1;
+            
+
+            //TODO: 更新每个节点与父节点的距离、处理顶点与球体的碰撞
+            //处理head的穿透时，为了避免头发紧贴头皮，可以让head的碰撞体略大于头本身，如collisionRadius=headRadius*1.5
+            float collisionRadius=headRadius*1.5f;
+            float3 headVec = positions[fatherIndex]-headPos;
+            if(length(headVec)<collisionRadius){
+              // 沿着从头到顶点的方向挪动到球体外表面
+              if(index==1)headVecLen = length(headVec);
+              float3 deltaPos = headVec/length(headVec)*collisionRadius;
+              positions[fatherIndex] = headPos + deltaPos;
+            }
+            float3 headVec1 = positions[curIndex]-headPos;
+            if(length(headVec1)<collisionRadius){
+              // 沿着从头到顶点的方向挪动到球体外表面
+              float3 deltaPos1 = headVec1/length(headVec1)*collisionRadius;
+              positions[curIndex] = headPos + deltaPos1;
+            }
+
+            float3 x1 = positions[fatherIndex];
+            float3 x2 = positions[curIndex];
+            float3 tmp = x2 - x1;
+            float tmpLen= length(tmp);
+            // 长度约束，弹簧振子模型
+            float times = (tmpLen - nodeDistance)/2/tmpLen;
+            positions[fatherIndex] = x1+(x2-x1)*times;
+            positions[curIndex] = x2- (x2-x1)*times;
+        }
+        positions[index * nodeCount] = rootPos;
+        
+    }
+
+}

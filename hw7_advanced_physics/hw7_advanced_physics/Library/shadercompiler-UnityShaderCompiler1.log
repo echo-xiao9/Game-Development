@@ -1,0 +1,11 @@
+Base path: '/Applications/Unity/2019.4.28f1c1/Unity.app/Contents', plugins path '/Applications/Unity/2019.4.28f1c1/Unity.app/Contents/PlaybackEngines'
+Cmd: initializeCompiler
+Cmd: compileSnippet
+  api=14 type=1 insize=4119 outsize=3701 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 14 at HairSimulate.compute(45): undeclared identifier 'rand'
+  api=14 insize=4948 outsize=0 ok=0
+Cmd: translateComputeKernel
+  api=14 insize=1240 outsize=1118 ok=1
+Cmd: translateComputeKernel
+  api=14 insize=2068 outsize=2665 ok=1

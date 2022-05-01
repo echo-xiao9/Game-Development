@@ -1,0 +1,18 @@
+Base path: '/Applications/Unity/2019.4.28f1c1/Unity.app/Contents', plugins path '/Applications/Unity/2019.4.28f1c1/Unity.app/Contents/PlaybackEngines'
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 2 plat 14 at HairSimulate.compute(45): undeclared identifier 'rand'
+  api=14 insize=4969 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=14 insize=4939 outsize=2396 ok=1
+Cmd: translateComputeKernel
+  api=14 insize=2068 outsize=2665 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 14 at ClothSimulate.compute(94): 'calculateF': implicit truncation of vector type
+  api=14 insize=2571 outsize=2065 ok=1
+Cmd: translateComputeKernel
+  api=14 insize=1996 outsize=2351 ok=1
+Cmd: compileComputeKernel
+  api=14 insize=2615 outsize=1760 ok=1
+Cmd: translateComputeKernel
+  api=14 insize=1744 outsize=1711 ok=1
