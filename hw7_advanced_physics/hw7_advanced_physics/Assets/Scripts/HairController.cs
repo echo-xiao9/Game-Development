@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class HairController : MonoBehaviour
 {
     //compute shader线程数和组数
-    private const int THREAD_X = 8;
+    private const int THREAD_X = 10;
     private int _groupX;
     //控制顶点总数
     private int totalNodeCount;
@@ -223,7 +223,7 @@ public class HairController : MonoBehaviour
     public void OnGravityChanged(float newValue)
     {
         //TODO:更新重力
-        print("oriGravity"+gravity.ToString());
+        // print("oriGravity"+gravity.ToString());
         gravity = -((float)newValue/10);
        
         hairSimulate.SetFloat("gravity",gravity);
@@ -243,6 +243,7 @@ public class HairController : MonoBehaviour
         hairCount =(int)(newValue*16);
         hairSimulate.SetInt("hairCount", hairCount);
         quantityText.text = "发丝数量："+hairCount.ToString("0");
+         _groupX = hairCount / THREAD_X;
         UpdateHair();
     }
     public void OnLengthChanged(float newValue)
@@ -261,6 +262,7 @@ public class HairController : MonoBehaviour
         hairRadius = newValue /50;
         hairSimulate.SetFloat("hairRadius", hairRadius);
         radiusText.text = "发丝半径：" + ((int)(hairRadius * 50)).ToString();
+
     }
     //在更新头发的长度与数量时需要调用，用于重新生成缓存
     public void UpdateHair()

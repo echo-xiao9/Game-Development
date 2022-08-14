@@ -7,6 +7,8 @@ public class ClothController : MonoBehaviour
 {
     //用于渲染
     public GameObject cloth;
+    // 碰撞的ball
+    public GameObject ball;
     //compute shader线程数
     private const int THREAD_X = 8;
     private const int THREAD_Y = 8;
@@ -17,6 +19,7 @@ public class ClothController : MonoBehaviour
     public Vector3 springKs = new Vector3(10000, 10000, 10000);
     public float mass = 1;
     public float stepTime = 0.08f;
+    // public float stepTime = 0.8f;
     //cloth尺寸
     public int sizeX = 120;
     public int sizeY = 120;
@@ -79,6 +82,7 @@ public class ClothController : MonoBehaviour
     void Start()
     {
         Initialize();
+        UpdateBall();
     }
 
     void Update()
@@ -91,7 +95,14 @@ public class ClothController : MonoBehaviour
 
         //绘制cloth
         RenderCloth(cloth, 1);
-
+       
+    }
+  
+    public void UpdateBall(){
+        var ballParams = (Vector4)ball.transform.position;
+        ballParams.w = ball.transform.localScale.x ;
+        print("ball:"+ballParams);
+        clothSimulate.SetVector("collisionBall",ballParams);
     }
     private void OnDestroy()
     {

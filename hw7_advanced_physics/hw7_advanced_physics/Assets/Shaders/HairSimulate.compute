@@ -99,7 +99,6 @@ void Step(uint3 id : SV_DispatchThreadID)
             
             uint fatherIndex = nodeCount * index + i - 1;
             
-
             //TODO: 更新每个节点与父节点的距离、处理顶点与球体的碰撞
             //处理head的穿透时，为了避免头发紧贴头皮，可以让head的碰撞体略大于头本身，如collisionRadius=headRadius*1.5
             float collisionRadius=headRadius*1.5f;

@@ -4,11 +4,15 @@
 
 #define THREAD_X 8
 #define THREAD_Y 8
+//阻尼系数
+#define Cd 0.5
 
 //顶点位置
 RWStructuredBuffer<float3> positions;
 //顶点速度
 RWStructuredBuffer<float3> velocities;
+///球形碰撞体
+uniform float4 collisionBall;
 
 //x表示横向顶点数量,y表示纵向顶点数量,z = x * y
 uint3 size;
@@ -19,9 +23,30 @@ uniform float3 restLengths;
 //单个顶点的质量
 uniform float mass;
 //单次迭代时间间隔
-float dt;
+float dt=0.08f;
 // 自定义重力加速度
-float gravity= -9.8f;
+float gravity= -9.8f*5;
+
+//结构弹簧的4个方向
+static uint2 SpringDirs[12] = {
+    //结构力
+    {1,0},
+    {0,1},
+    {-1,0},
+    {0,-1},
+    //剪力
+    {-1,-1},
+    {-1,1},
+    {1,-1},
+    {1,1},
+    //弯矩力
+    {-2,0},
+    {2,0},
+    {0,2},
+    {0,-2},
+};
+
+
 
 //根据线程ID，获取对应顶点的索引
 static uint getIndex(uint2 id) {
@@ -52,22 +77,75 @@ static bool isValidateId(uint2 id) {
     return id.x >= 0 && id.x < size.x && id.y >= 0 && id.y < size.y;
 }
 
+//弹性力计算(胡克定律)
+//springType 0,1,2分别代表结构弹簧、剪力弹簧、弯曲弹簧
+static float3 getSpring(float3 p,float3 q,uint springType){
+    float3 dp = p - q;
+    float len = length(dp);
+    float restL;
+    switch(springType){
+      case 0: 
+        restL = restLengths.x;
+        return dp * (springKs.x * (restL * rcp(len) - 1));
+        
+      case 1: 
+        restL = restLengths.y;
+        return dp * (springKs.y * (restL * rcp(len) - 1));
+ 
+      default:
+        restL = restLengths.z;
+        return dp * (springKs.z * (restL * rcp(len) - 1));
 
+    }
+    // will never arrive this
+    return float3(0,0,0);
+}
 static float3 calculateF(uint2 id, float3 position, float3 velocity) {
     uint index = getIndex(id);
     float3 f = float3(0, 0, 0);
     
     //TODO:计算重力
-    f.y += gravity;
+
+    float3 fg = float3(0,-9.8f,0) * mass;
+    f += fg;
 
 
     //TODO:计算弹性力
-
+    for(uint i = 0; i < 12; i ++){
+        uint2 nId = id + SpringDirs[i];
+        uint nIndex = getIndex(nId);
+        if(isValidateId(nId)){
+            float3 nPos = getPosition(nIndex);
+            f += getSpring(position,nPos,i / 4);
+        }
+    }
 
     //TODO:计算阻尼力
 
+    float3 fd = - Cd * velocity;
+    f += fd;
 
     return f;
+}
+
+
+static void detechBallCollision(uint2 id){
+    uint index = getIndex(id);
+    float3 pos = getPosition(index);
+    float3 bCenter = collisionBall.xyz;
+    float bRaidus = collisionBall.w;
+    float disToBall = distance(pos,bCenter) - bRaidus;;
+    if(disToBall < 0){
+        float3 e = normalize(pos - bCenter);
+        pos = pos - disToBall * e;
+
+        float3 v = getVelocity(index);
+        positions[index]=float3(0,0,0);
+        v = v - dot(v,e) * e;
+        // setVelocity(index,v);
+        // setPosition(index,pos);
+        
+    }
 }
 
 
@@ -79,6 +157,7 @@ void Init(uint3 id : SV_DispatchThreadID)
     positions[index] = float3(id.x * restLengths.x, 0, id.y * restLengths.x);
     velocities[index] = float3(0, 0, 0);
 }
+
 
 [numthreads(THREAD_X, THREAD_Y, 1)]
 void Step(uint3 id : SV_DispatchThreadID)
@@ -96,9 +175,13 @@ void Step(uint3 id : SV_DispatchThreadID)
 
     //TODO:更新速度
     velocities[index] += a*dt;
-
+    float3 deltaPos = float3(velocities[index].x*dt,velocities[index].y*dt,velocities[index].z*dt);
     //TODO:更新位置
-    positions[index] += velocities[index]*dt*10;
-    //  positions[index]=float3(0,0,0);
+    positions[index] += deltaPos;
+    // 碰撞检测
+    float3 bCenter = collisionBall.xyz;
+    float bRaidus = collisionBall.w;
+    float3 btoC = positions[index] - bCenter;
+    if(length(btoC) < 100.0f) positions[index]=float3(length(btoC),length(btoC),length(btoC));
 }
 
